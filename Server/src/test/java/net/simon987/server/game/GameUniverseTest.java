@@ -151,22 +151,16 @@ public class GameUniverseTest {
 
     @Test
     public void getWorlds() {
-//        Does not work
-//        TileMap t = new TileMap(16, 16);
-//        World worldMock1 = new World(16, 16, t);
-//        World worldMock2 = new World(18, 18, t);
-//
-//        gameUniverse.addWorld(worldMock1);
-//
-//        Collection<World> worldCollection = Mockito.mock(Collection.class);
-//        worldCollection.add(worldMock1);
-//        if (gameUniverse.getWorlds().equals(worldCollection)){
-//            System.out.println("true");
-//        }else{
-//            System.out.println("false");
-//        }
 
-
+        TileMap t = new TileMap(16, 16);
+        World worldMock1 = new World(16, 16, t);
+        World worldMock2 = new World(18, 18, t);
+        ConcurrentHashMap<String, World> worldCollection = new ConcurrentHashMap<>();
+        worldCollection.put(worldMock1.getId(),worldMock1);
+        worldCollection.put(worldMock2.getId(),worldMock2);
+        this.gameUniverse.addWorld(worldMock1);
+        this.gameUniverse.addWorld(worldMock2);
+        assertEquals(worldCollection.values()+"",this.gameUniverse.getWorlds()+"");
     }
 
     @Test
