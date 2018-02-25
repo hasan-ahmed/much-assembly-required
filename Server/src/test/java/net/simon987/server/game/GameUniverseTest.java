@@ -13,6 +13,7 @@ import java.lang.reflect.Field;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 
 import static org.junit.Assert.*;
@@ -165,6 +166,28 @@ public class GameUniverseTest {
 
     @Test
     public void getWorldCount() {
+        Random r = new Random();
+        int randNum = r.nextInt(10);
+        TileMap tileMapMock = Mockito.mock(TileMap.class);
+        for (int i = 0; i < randNum ; i++) {
+
+            World world = new World(i,1, tileMapMock);
+            gameUniverse.addWorld(world);
+        }
+
+        Field privateCollectionWorld;
+        ConcurrentHashMap<String,World> valueOfCollectionWOrld = null;
+        try {
+            privateCollectionWorld = GameUniverse.class.getDeclaredField("worlds");
+            privateCollectionWorld.setAccessible(true);
+            valueOfCollectionWOrld = (ConcurrentHashMap<String, World>) privateCollectionWorld.get(gameUniverse);
+        } catch (NoSuchFieldException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        }
+        assertEquals(randNum, valueOfCollectionWOrld.size());
+
     }
 
     @Test
