@@ -254,6 +254,21 @@ public class GameUniverseTest {
     }
 
     @Test
+    public void setNextObjectId() {
+        Random r = new Random();
+        int objectId = r.nextInt(100-1) + 1;
+        int nextObjectId = objectId + 1;
+
+        GameUniverse uniMock = Mockito.mock(GameUniverse.class);
+        uniMock.setNextObjectId(objectId);
+        when(uniMock.getNextObjectId()).thenReturn((long)nextObjectId);
+
+        this.gameUniverse.setNextObjectId(objectId);
+
+        assertEquals(uniMock.getNextObjectId(), gameUniverse.getNextObjectId());
+    }
+
+    @Test
     public void getGuestUsername() {
         Random r = new Random();
         int guestNumber = r.nextInt(10000-1) + 1;
