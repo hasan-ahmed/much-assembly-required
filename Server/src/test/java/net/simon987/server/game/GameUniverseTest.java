@@ -154,13 +154,13 @@ public class GameUniverseTest {
     public void getWorlds() {
 
         TileMap t = new TileMap(16, 16);
-        World worldMock1 = new World(16, 16, t);
-        World worldMock2 = new World(18, 18, t);
+        World world1 = new World(16, 16, t);
+        World world2 = new World(18, 18, t);
         ConcurrentHashMap<String, World> worldCollection = new ConcurrentHashMap<>();
-        worldCollection.put(worldMock1.getId(),worldMock1);
-        worldCollection.put(worldMock2.getId(),worldMock2);
-        this.gameUniverse.addWorld(worldMock1);
-        this.gameUniverse.addWorld(worldMock2);
+        worldCollection.put(world1.getId(),world1);
+        worldCollection.put(world2.getId(),world2);
+        this.gameUniverse.addWorld(world1);
+        this.gameUniverse.addWorld(world2);
         assertEquals(worldCollection.values()+"",this.gameUniverse.getWorlds()+"");
     }
 
@@ -192,10 +192,45 @@ public class GameUniverseTest {
 
     @Test
     public void getUsers() {
+        User userMock1 = Mockito.mock(User.class);
+        User userMock2 = Mockito.mock(User.class);
+        Mockito.when(userMock1.getUsername()).thenReturn("test@test.com");
+        Mockito.when(userMock2.getUsername()).thenReturn("test2@test.com");
+        ConcurrentHashMap<String, User> userCollection = new ConcurrentHashMap<>();
+
+
+        userCollection.put(userMock1.getUsername(),userMock1);
+        userCollection.put(userMock2.getUsername(),userMock2);
+        this.gameUniverse.addUser(userMock1);
+        this.gameUniverse.addUser(userMock2);
+
+        assertEquals(userCollection.values()+"",this.gameUniverse.getUsers()+"");
+
     }
 
     @Test
     public void getUserCount() {
+        Random r = new Random();
+        int randNum = r.nextInt(10);
+        for (int i = 0; i < randNum ; i++) {
+            User userMock = Mockito.mock(User.class);
+            Mockito.when(userMock.getUsername()).thenReturn("test"+i+"@test.com");
+            gameUniverse.addUser(userMock);
+        }
+
+        Field privateCollectionUsers;
+        ConcurrentHashMap<String,User> valueOfCollectionUsers = null;
+        try {
+            privateCollectionUsers = GameUniverse.class.getDeclaredField("users");
+            privateCollectionUsers.setAccessible(true);
+            valueOfCollectionUsers = (ConcurrentHashMap<String, User>) privateCollectionUsers.get(gameUniverse);
+        } catch (NoSuchFieldException e) {
+            e.printStackTrace();
+        } catch (IllegalAccessException e) {
+            e.printStackTrace();
+        }
+        assertEquals(randNum, valueOfCollectionUsers.size());
+
     }
 
     @Test
