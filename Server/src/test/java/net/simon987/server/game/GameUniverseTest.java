@@ -17,6 +17,7 @@ import java.util.concurrent.ConcurrentHashMap;
 
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 public class GameUniverseTest {
@@ -146,6 +147,16 @@ public class GameUniverseTest {
 
     @Test
     public void getObject() {
+        GameUniverse uniMock = Mockito.mock(GameUniverse.class);
+        GameObject objMock = Mockito.mock(GameObject.class);
+        objMock.setObjectId(1);
+        objMock.setX(2);
+        objMock.setY(2);
+        verify(objMock).setObjectId(1);
+        verify(objMock).setX(2);
+        verify(objMock).setY(2);
+        when(uniMock.getObject(1)).thenReturn(objMock);
+        assertEquals(objMock, uniMock.getObject(1));
     }
 
     @Test
@@ -179,6 +190,11 @@ public class GameUniverseTest {
 
     @Test
     public void getNextObjectId() {
+        GameUniverse uniMock = Mockito.mock(GameUniverse.class);
+        uniMock.setNextObjectId(1);
+        verify(uniMock).setNextObjectId(1);
+        when(uniMock.getNextObjectId()).thenReturn((long)1);
+        assertEquals(uniMock.getNextObjectId(), gameUniverse.getNextObjectId());
     }
 
     @Test
