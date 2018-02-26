@@ -239,6 +239,16 @@ public class GameUniverseTest {
 
     @Test
     public void getGuestUsername() {
+        Random r = new Random();
+        int guestNumber = r.nextInt(10000-1) + 1;
+
+        String guestUsername = "guest" + String.valueOf(guestNumber);
+        User guestUser = Mockito.mock(User.class);
+        Mockito.when(guestUser.getUsername()).thenReturn(guestUsername);
+
+        this.gameUniverse.addUser(guestUser);
+
+        assertNotEquals(guestUsername, this.gameUniverse.getGuestUsername());
     }
 
     @Test
