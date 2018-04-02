@@ -8,13 +8,18 @@ import java.util.HashMap;
 public class OnlineUserHashStorage extends OnlineUserManager {
 
     private HashMap<WebSocket, OnlineUser> onlineUsersHash = new HashMap<>();
-
+    
+    //constructor
+    public OnlineUserHashStorage(){
+    	
+    }
     public OnlineUser getUser(WebSocket socket) {
         return onlineUsersHash.get(socket);
     }
 
     public void add(OnlineUser user) {
-    	//
+    	//Map.Entry<K,V> from https://docs.oracle.com/javase/8/docs/api/java/util/HashMap.html
+    	//socket would be the key here
         onlineUsersHash.put(user.getWebSocket(), user);
     }
 
@@ -27,13 +32,21 @@ public class OnlineUserHashStorage extends OnlineUserManager {
             onlineUsersHash.put(user.getWebSocket(), user);
         }
     }
+    //get OnlineUser from the OnlineUserManager ArrayList
+    public OnlineUser User(WebSocket socket) {
+    	return super.getUser(socket);
+    }
+
 
     //return number of inconsistency
     public int checkConsistency() {
     	int inconsistencies = 0;
     	
     	for (WebSocket socket : onlineUsersHash.keySet()) {
-    		OnlineUser expected = onlineUsersHash.get(socket);
+    		//get from OnlineUserManager (old storage)
+    		OnlineUser expected = User(socket);
+    		
+    		//get from the hash map (new storage)
     		OnlineUser actual = onlineUsersHash.get(socket);
     		
     		//compare each param of actual and param
