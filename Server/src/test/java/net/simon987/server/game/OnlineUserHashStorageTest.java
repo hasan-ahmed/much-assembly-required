@@ -10,15 +10,18 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 
+import static org.mockito.Mockito.*;
+
 import net.simon987.server.webserver.OnlineUser;
 import net.simon987.server.webserver.OnlineUserHashStorage;
 
 public class OnlineUserHashStorageTest {
 
 	@Mock
-	OnlineUser mockOnlineUser;
+	OnlineUser mockOnlineUser = mock(OnlineUser.class);
+	
 	@Mock
-	WebSocket mockSocket;
+	WebSocket mockSocket = mock(WebSocket.class);
 	//not mocked yet
 	
 	//new storage
