@@ -14,6 +14,7 @@ public class OnlineUserHashStorage extends OnlineUserManager {
     }
 
     public void add(OnlineUser user) {
+    	//
         onlineUsersHash.put(user.getWebSocket(), user);
     }
 
@@ -27,4 +28,28 @@ public class OnlineUserHashStorage extends OnlineUserManager {
         }
     }
 
+    //return number of inconsistency
+    public int checkConsistency() {
+    	int inconsistencies = 0;
+    	
+    	for (WebSocket socket : onlineUsersHash.keySet()) {
+    		OnlineUser expected = onlineUsersHash.get(socket);
+    		OnlineUser actual = onlineUsersHash.get(socket);
+    		
+    		//compare each param of actual and param
+    		if(actual != expected) {
+    			inconsistencies++;
+    			violation(socket, expected, actual);	
+    		}
+    		
+    	}
+    	return inconsistencies;
+    }
+    private void violation(WebSocket socket, OnlineUser expected, OnlineUser actual) {
+		System.out.println("Consistency Violation!\n" + 
+				"socket = " + socket +
+				"\n\t expected = " + expected
+				+ "\n\t actual = " + actual);
+	}
 }
+
