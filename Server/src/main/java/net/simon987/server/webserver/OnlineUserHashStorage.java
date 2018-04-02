@@ -33,8 +33,8 @@ public class OnlineUserHashStorage extends OnlineUserManager {
     }
 
     public void add(OnlineUser onlineUser) {
-    	//Map.Entry<K,V> from https://docs.oracle.com/javase/8/docs/api/java/util/HashMap.html
-    	//socket would be the key here
+        super.add(onlineUser);
+        // Shadow Write
         onlineUsersHash.put(onlineUser.getWebSocket(), onlineUser);
     }
 
@@ -47,7 +47,6 @@ public class OnlineUserHashStorage extends OnlineUserManager {
             onlineUsersHash.put(user.getWebSocket(), user);
         }
     }
-
 
     //return number of inconsistency
     public int checkConsistency() {
