@@ -42,6 +42,7 @@ public class OnlineUserHashStorage extends OnlineUserManager {
         onlineUsersHash.remove(onlineUser.getWebSocket());
     }
 
+    //super.getOnlineUsers return the arraylist
     public void forklift() {
         for (OnlineUser user : super.getOnlineUsers()) {
             onlineUsersHash.put(user.getWebSocket(), user);
