@@ -25,7 +25,7 @@ public class OnlineUserHashStorage extends OnlineUserManager {
         if(!expected.equals(actual)){
             readInconsistenies++;
             // Fix inconsistency
-            add(expected);
+            onlineUsersHash.put(socket, expected);
             violation(socket,expected,actual);
         }
 
@@ -60,8 +60,9 @@ public class OnlineUserHashStorage extends OnlineUserManager {
     		OnlineUser actual = onlineUsersHash.get(socket);
     		
     		//compare each param of actual and param
-    		if(actual != expected) {
+    		if(!actual.equals(expected)) {
     			inconsistencies++;
+    			onlineUsersHash.put(socket,expected);
     			violation(socket, expected, actual);	
     		}
     		
