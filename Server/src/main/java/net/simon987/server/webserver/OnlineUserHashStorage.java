@@ -7,34 +7,45 @@ import java.util.HashMap;
 
 public class OnlineUserHashStorage extends OnlineUserManager {
 
-    private HashMap<WebSocket, OnlineUser> onlineUsersHash = new HashMap<>();
+    private HashMap<WebSocket, OnlineUser> onlineUsersHash;
+    public  int readInconsistenies = 0;
     
     //constructor
     public OnlineUserHashStorage(){
+        this.onlineUsersHash = new HashMap<>();
     	
     }
+
     public OnlineUser getUser(WebSocket socket) {
-        return onlineUsersHash.get(socket);
+        OnlineUser expected = super.getUser(socket);
+
+        // Shadow Read
+        OnlineUser actual = onlineUsersHash.get(socket);
+
+        if(!expected.equals(actual)){
+            readInconsistenies++;
+            // Fix inconsistency
+            add(expected);
+            violation(socket,expected,actual);
+        }
+
+        return expected;
     }
 
-    public void add(OnlineUser user) {
+    public void add(OnlineUser onlineUser) {
     	//Map.Entry<K,V> from https://docs.oracle.com/javase/8/docs/api/java/util/HashMap.html
     	//socket would be the key here
-        onlineUsersHash.put(user.getWebSocket(), user);
+        onlineUsersHash.put(onlineUser.getWebSocket(), onlineUser);
     }
 
-    public void remove(OnlineUser user) {
-        onlineUsersHash.remove(user.getWebSocket());
+    public void remove(OnlineUser onlineUser) {
+        onlineUsersHash.remove(onlineUser.getWebSocket());
     }
 
     public void forklift() {
-        for (OnlineUser user : getOnlineUsers()) {
+        for (OnlineUser user : super.getOnlineUsers()) {
             onlineUsersHash.put(user.getWebSocket(), user);
         }
-    }
-    //get OnlineUser from the OnlineUserManager ArrayList
-    public OnlineUser User(WebSocket socket) {
-    	return super.getUser(socket);
     }
 
 
@@ -44,7 +55,7 @@ public class OnlineUserHashStorage extends OnlineUserManager {
     	
     	for (WebSocket socket : onlineUsersHash.keySet()) {
     		//get from OnlineUserManager (old storage)
-    		OnlineUser expected = User(socket);
+    		OnlineUser expected = super.getUser(socket);
     		
     		//get from the hash map (new storage)
     		OnlineUser actual = onlineUsersHash.get(socket);
@@ -64,5 +75,9 @@ public class OnlineUserHashStorage extends OnlineUserManager {
 				"\n\t expected = " + expected
 				+ "\n\t actual = " + actual);
 	}
+
+	public int getReadInconsistenies() {
+        return readInconsistenies;
+    }
 }
 
