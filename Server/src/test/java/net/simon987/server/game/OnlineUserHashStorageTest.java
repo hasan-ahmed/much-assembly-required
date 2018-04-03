@@ -22,28 +22,43 @@ public class OnlineUserHashStorageTest {
 	
 	@Mock
 	WebSocket mockSocket = mock(WebSocket.class);
-	//not mocked yet
+	
 	
 	//new storage
 	OnlineUserHashStorage onlineUserHashStorage;
 	
 	@Before
 	public void setup() {
-		
-		HashMap<WebSocket, OnlineUser> onlineUsersHash = null;
 		onlineUserHashStorage = new OnlineUserHashStorage();
-		
+		HashMap<WebSocket, OnlineUser> onlineUsersHash = new HashMap<>();
 		onlineUsersHash.put(mockSocket, mockOnlineUser);
 	}
 	
 	@Test
 	public void test() {
-		
+		//---------------Forklift Validation-----------------
 		onlineUserHashStorage.forklift();
 		
 		//check if there are no inconsistency after the forklift
 		int inconsistency = onlineUserHashStorage.checkConsistency();
 		assertEquals(inconsistency,0);
+		
+		
+		//-------------Shadow Write Validation------------------
+		
+		//changes are now written directly to old storage
+		//consistency should be checked after each write
+		onlineUserHashStorage.add(mockOnlineUser);
+		assertEquals(0, onlineUserHashStorage.checkConsistency());
+		
+		//-------------Shadow Read Validation-------------------
+		
+		//change the new storage only
+		
+		//check that there is 1 inconsistency and 
+		assertEquals(1, onlineUserHashStorage.getReadInconsistenies());
+		assertEquals(0, onlineUserHashStorage.checkConsistency());
+		
 	}
 
 }
