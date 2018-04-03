@@ -35,14 +35,17 @@ public class OnlineUserHashStorageTest {
 	}
 	
 	@Test
-	public void test() {
+	public void testForklift() {
 		//---------------Forklift Validation-----------------
 		onlineUserHashStorage.forklift();
 		
 		//check if there are no inconsistency after the forklift
 		int inconsistency = onlineUserHashStorage.checkConsistency();
 		assertEquals(inconsistency,0);
-		
+	}
+	
+	@Test
+	public void testShadowWrite() {
 		
 		//-------------Shadow Write Validation------------------
 		
@@ -50,12 +53,20 @@ public class OnlineUserHashStorageTest {
 		//consistency should be checked after each write
 		onlineUserHashStorage.add(mockOnlineUser);
 		assertEquals(0, onlineUserHashStorage.checkConsistency());
-		
+	}
+	
+	@Test
+	public void testShadowRead() {
 		//-------------Shadow Read Validation-------------------
 		
 		//change the new storage only
+		when(onlineUserHashStorage.getUser(mockSocket)).thenReturn(mockOnlineUser);
 		
-		//check that there is 1 inconsistency and 
+		//make the shadow read and check if method for checking read inconsistency has been called
+		onlineUserHashStorage.getUser(mockSocket);
+		verify(onlineUserHashStorage).getReadInconsistenies();
+		
+		//check that there is 1 inconsistency and inconsistency fix
 		assertEquals(1, onlineUserHashStorage.getReadInconsistenies());
 		assertEquals(0, onlineUserHashStorage.checkConsistency());
 		
