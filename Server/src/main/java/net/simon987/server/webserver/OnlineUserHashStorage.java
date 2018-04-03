@@ -8,9 +8,9 @@ import java.util.HashMap;
 public class OnlineUserHashStorage extends OnlineUserManager implements Runnable {
 
     private HashMap<WebSocket, OnlineUser> onlineUsersHash;
-    private  int readInconsistenies = 0;
-    private int inconsistencies = 0;
-    private int checkConsistencyRunCounter = 0;
+    private int readInconsistenies = 0;
+    private double inconsistencies = 0;
+    private double checkConsistencyRunCounter = 0;
     private Thread t = new Thread();
     
     //constructor
@@ -25,6 +25,9 @@ public class OnlineUserHashStorage extends OnlineUserManager implements Runnable
         // Shadow Read
         OnlineUser actual = onlineUsersHash.get(socket);
 
+        if(inconsistencies / checkConsistencyRunCounter < .005)
+            return actual;
+
         if(!expected.equals(actual)){
             readInconsistenies++;
             // Fix inconsistency
@@ -36,14 +39,24 @@ public class OnlineUserHashStorage extends OnlineUserManager implements Runnable
     }
 
     public void add(OnlineUser onlineUser) {
-        super.add(onlineUser);
-        // Shadow Write
-        onlineUsersHash.put(onlineUser.getWebSocket(), onlineUser);
+        if(inconsistencies / checkConsistencyRunCounter < .005)
+            onlineUsersHash.put(onlineUser.getWebSocket(), onlineUser);
+        else {
+            super.add(onlineUser);
+            // Shadow Write
+            onlineUsersHash.put(onlineUser.getWebSocket(), onlineUser);
+        }
         t.start();
     }
 
     public void remove(OnlineUser onlineUser) {
-        onlineUsersHash.remove(onlineUser.getWebSocket());
+        if(inconsistencies / checkConsistencyRunCounter < .005)
+            onlineUsersHash.remove(onlineUser.getWebSocket());
+        else {
+            super.remove(onlineUser);
+            // Shadow Remove
+            onlineUsersHash.remove(onlineUser.getWebSocket());
+        }
         t.start();
     }
 
@@ -56,7 +69,7 @@ public class OnlineUserHashStorage extends OnlineUserManager implements Runnable
     }
 
     //return number of inconsistency
-    public int checkConsistency() {
+    public double checkConsistency() {
     	
     	for (WebSocket socket : onlineUsersHash.keySet()) {
     		//get from OnlineUserManager (old storage)
