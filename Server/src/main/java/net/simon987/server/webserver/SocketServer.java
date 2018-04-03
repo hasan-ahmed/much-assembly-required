@@ -38,7 +38,7 @@ import java.util.ArrayList;
 
 public class SocketServer extends WebSocketServer {
 
-    private OnlineUserManager userManager = new OnlineUserManager();
+    private OnlineUserManager userManager = new OnlineUserHashStorage();
 
     private SocketServerDatabase database;
 
