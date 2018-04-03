@@ -5,10 +5,13 @@ import org.java_websocket.WebSocket;
 import java.util.HashMap;
 
 
-public class OnlineUserHashStorage extends OnlineUserManager {
+public class OnlineUserHashStorage extends OnlineUserManager implements Runnable {
 
     private HashMap<WebSocket, OnlineUser> onlineUsersHash;
-    public  int readInconsistenies = 0;
+    private  int readInconsistenies = 0;
+    private int inconsistencies = 0;
+    private int checkConsistencyRunCounter = 0;
+    private Thread t = new Thread();
     
     //constructor
     public OnlineUserHashStorage(){
@@ -36,10 +39,12 @@ public class OnlineUserHashStorage extends OnlineUserManager {
         super.add(onlineUser);
         // Shadow Write
         onlineUsersHash.put(onlineUser.getWebSocket(), onlineUser);
+        t.start();
     }
 
     public void remove(OnlineUser onlineUser) {
         onlineUsersHash.remove(onlineUser.getWebSocket());
+        t.start();
     }
 
     //super.getOnlineUsers return the arraylist
@@ -47,11 +52,11 @@ public class OnlineUserHashStorage extends OnlineUserManager {
         for (OnlineUser user : super.getOnlineUsers()) {
             onlineUsersHash.put(user.getWebSocket(), user);
         }
+        t.start();
     }
 
     //return number of inconsistency
     public int checkConsistency() {
-    	int inconsistencies = 0;
     	
     	for (WebSocket socket : onlineUsersHash.keySet()) {
     		//get from OnlineUserManager (old storage)
@@ -59,16 +64,18 @@ public class OnlineUserHashStorage extends OnlineUserManager {
     		
     		//get from the hash map (new storage)
     		OnlineUser actual = onlineUsersHash.get(socket);
+
+    		this.checkConsistencyRunCounter++;
     		
     		//compare each param of actual and param
     		if(!actual.equals(expected)) {
-    			inconsistencies++;
+    			this.inconsistencies++;
     			onlineUsersHash.put(socket,expected);
     			violation(socket, expected, actual);	
     		}
     		
     	}
-    	return inconsistencies;
+    	return this.inconsistencies;
     }
     private void violation(WebSocket socket, OnlineUser expected, OnlineUser actual) {
 		System.out.println("Consistency Violation!\n" + 
@@ -79,6 +86,11 @@ public class OnlineUserHashStorage extends OnlineUserManager {
 
 	public int getReadInconsistenies() {
         return readInconsistenies;
+    }
+
+    @Override
+    public void run() {
+        checkConsistency();
     }
 }
 
