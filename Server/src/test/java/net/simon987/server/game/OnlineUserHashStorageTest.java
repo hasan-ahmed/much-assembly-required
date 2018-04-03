@@ -32,10 +32,14 @@ public class OnlineUserHashStorageTest {
 		onlineUserHashStorage = new OnlineUserHashStorage();
 		HashMap<WebSocket, OnlineUser> onlineUsersHash = new HashMap<>();
 		onlineUsersHash.put(mockSocket, mockOnlineUser);
+
+		//dependency injection of websocket into mockOnlineUser
+		when(mockOnlineUser.getWebSocket()).thenReturn(mockSocket);
 	}
 	
 	@Test
 	public void test() {
+
 		//---------------Forklift Validation-----------------
 		onlineUserHashStorage.forklift();
 		

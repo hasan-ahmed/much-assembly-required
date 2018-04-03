@@ -22,6 +22,16 @@ public class OnlineUser {
 
     }
 
+    /**
+     * FOR TESTING PURPOSES ONLY
+     * @return
+     */
+
+    public void setWebsocketForTesting(WebSocket socket){
+        this.webSocket = socket;
+        System.out.println("set websocket for testing");
+    }
+
     public WebSocket getWebSocket() {
         return webSocket;
     }
