@@ -35,10 +35,16 @@ public class GameUniverse {
         worlds = new ConcurrentHashMap<>(256);
         users = new ConcurrentHashMap<>(16);
 
-        worldGenerator = new WorldGenerator(config);
+        worldGenerator = new WorldGeneratorOriginal(config);
     }
 
-    public void setMongo(MongoClient mongo){
+    public GameUniverse(int worldsInitialCapacity, int usersInitialCapacity, WorldGenerator worldGenerator) {
+        worlds = new ConcurrentHashMap<>(worldsInitialCapacity);
+        users = new ConcurrentHashMap<>(usersInitialCapacity);
+        this.worldGenerator = worldGenerator;
+    }
+
+    public void setMongo(MongoClient mongo) {
         this.mongo = mongo;
     }
 
@@ -49,54 +55,51 @@ public class GameUniverse {
     /**
      * Attempts loading a world from mongoDB by coordinates
      *
-     * @param x     the x coordinate of the world
-     * @param y     the y coordinate of the world
-     *
+     * @param x the x coordinate of the world
+     * @param y the y coordinate of the world
      * @return World, null if not found
      */
-    private World loadWorld(int x, int y){
-        
+    private World loadWorld(int x, int y) {
+
         DB db = mongo.getDB("mar");
         DBCollection worlds = db.getCollection("world");
 
         BasicDBObject whereQuery = new BasicDBObject();
-        whereQuery.put("_id", World.idFromCoordinates(x,y));
+        whereQuery.put("_id", World.idFromCoordinates(x, y));
         DBCursor cursor = worlds.find(whereQuery);
         if (cursor.hasNext()) {
             World w = World.deserialize(cursor.next());
             return w;
-        }
-        else{
+        } else {
             return null;
         }
     }
 
     /**
      * Get a world by coordinates, attempts to load from mongoDB if not found.
-     * 
-     * @param x             the x coordinate of the world
-     * @param y             the y coordinate of the world
-     * @param createNew     if true, a new world is created when a world with given coordinates is not found
      *
-     * @return World, null if not found and not created. 
+     * @param x         the x coordinate of the world
+     * @param y         the y coordinate of the world
+     * @param createNew if true, a new world is created when a world with given coordinates is not found
+     * @return World, null if not found and not created.
      */
     public World getWorld(int x, int y, boolean createNew) {
 
         // Wrapping coordinates around cyclically
-        x %= maxWidth+1;
-        y %= maxWidth+1;
+        x %= maxWidth + 1;
+        y %= maxWidth + 1;
 
         // Looks for a previously loaded world
-        World world = getLoadedWorld(x,y);
-        if (world != null){
+        World world = getLoadedWorld(x, y);
+        if (world != null) {
             return world;
         }
 
         // Tries loading the world from the database
-        world = loadWorld(x,y);
-        if (world != null){
+        world = loadWorld(x, y);
+        if (world != null) {
             addWorld(world);
-            LogManager.LOGGER.fine("Loaded world "+(World.idFromCoordinates(x,y))+" from mongodb.");
+            LogManager.LOGGER.fine("Loaded world " + (World.idFromCoordinates(x, y)) + " from mongodb.");
             return world;
         }
 
@@ -105,59 +108,59 @@ public class GameUniverse {
             // Creates a new world
             world = createWorld(x, y);
             addWorld(world);
-            LogManager.LOGGER.fine("Created new world "+(World.idFromCoordinates(x,y))+".");
+            LogManager.LOGGER.fine("Created new world " + (World.idFromCoordinates(x, y)) + ".");
             return world;
         } else {
             return null;
         }
-    }    
+    }
 
     public World getLoadedWorld(int x, int y) {
         // Wrapping coordinates around cyclically
-        x %= maxWidth+1;
-        y %= maxWidth+1;
+        x %= maxWidth + 1;
+        y %= maxWidth + 1;
 
-        return worlds.get(World.idFromCoordinates(x,y));
-    }    
+        return worlds.get(World.idFromCoordinates(x, y));
+    }
 
     /**
      * Adds a new or freshly loaded world to the universe (if not already present).
-     * 
-     * @param world     the world to be added
+     *
+     * @param world the world to be added
      */
-    public void addWorld(World world){
+    public void addWorld(World world) {
         World w = worlds.get(world.getId());
-        if (w == null){
+        if (w == null) {
             world.setUniverse(this);
-            worlds.put(world.getId(),world);
+            worlds.put(world.getId(), world);
         }
     }
 
-    public World getWorldValue(String key){
+    public World getWorldValue(String key) {
         return worlds.get(key);
     }
 
     /**
      * Removes the world with given coordinates from the universe.
      *
-     * @param x     the x coordinate of the world to be removed
-     * @param y     the y coordinate of the world to be removed
+     * @param x the x coordinate of the world to be removed
+     * @param y the y coordinate of the world to be removed
      */
-    public void removeWorld(int x, int y){
-        World w = worlds.remove(World.idFromCoordinates(x,y));
-        if (w != null){
+    public void removeWorld(int x, int y) {
+        World w = worlds.remove(World.idFromCoordinates(x, y));
+        if (w != null) {
             w.setUniverse(null);
         }
     }
 
     /**
      * Removes the given world from the universe.
-     * 
-     * @param world     the world to be removed.
+     *
+     * @param world the world to be removed.
      */
-    public void removeWorld(World world){
+    public void removeWorld(World world) {
         World w = worlds.remove(world.getId());
-        if (w != null){
+        if (w != null) {
             w.setUniverse(null);
         }
     }
